@@ -11,9 +11,9 @@ interface Props {
 function getMetricRows(urlRows: UrlRow[]): MetricRows {
   return urlRows.reduce<MetricRows>((acc, row) => {
     Object.entries(row).forEach((metrics) => {
-      const [metric, value] = metrics as [Metric, string];
+      const [metric, value] = metrics as [Metric, number];
       acc[metric] = acc[metric] || [];
-      acc[metric].push(parseInt(value));
+      acc[metric].push(value);
     });
 
     return acc;

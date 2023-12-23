@@ -6,6 +6,7 @@ export async function getData(): Promise<UrlRows> {
 
   const { data } = Papa.parse<RawRow>(csvData, {
     header: true,
+    dynamicTyping: true,
   });
 
   const urlRows = data.reduce<UrlRows>(
