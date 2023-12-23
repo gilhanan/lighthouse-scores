@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import {
   Chart as ChartJS,
@@ -12,6 +12,8 @@ import {
   Legend,
 } from "chart.js";
 import DurationsChat from "./DurationsChat";
+import { getData } from "./data";
+import { UrlRows } from "./models";
 
 ChartJS.register(
   Colors,
@@ -25,11 +27,21 @@ ChartJS.register(
 );
 
 function App() {
+  const [data, setData] = useState<UrlRows>({});
+
+  async function loadData() {
+    setData(await getData());
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   return (
     <div className="flex flex-row">
-      {new Array(3).fill(0).map((_, i) => (
-        <div className="flex-1">
-          <DurationsChat key={i} title={`Chat ${i + 1}`} />
+      {Object.entries(data).map(([url, rows]) => (
+        <div key={url} className="flex-1">
+          <DurationsChat title={url} urlRows={rows} />
         </div>
       ))}
     </div>

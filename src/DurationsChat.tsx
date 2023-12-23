@@ -1,32 +1,27 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
-
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
-
-const data = {
-  labels,
-  datasets: [
-    {
-      label: "Dataset 1",
-      data: labels.map(() => Math.floor(Math.random() * 10)),
-      borderColor: "rgb(255, 99, 132)",
-      backgroundColor: "rgba(255, 99, 132, 0.5)",
-    },
-    {
-      label: "Dataset 2",
-      data: labels.map(() => Math.floor(Math.random() * 10)),
-      borderColor: "rgb(53, 162, 235)",
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-    },
-  ],
-};
+import { UrlRow, Metric, MetricRows } from "./models";
+import { ChartOptions, ChartData } from "chart.js";
 
 interface Props {
   title: string;
+  urlRows: UrlRow[];
 }
 
-function DurationsChat({ title }: Props) {
-  const options = {
+function getMetricRows(urlRows: UrlRow[]): MetricRows {
+  return urlRows.reduce<MetricRows>((acc, row) => {
+    Object.entries(row).forEach((metrics) => {
+      const [metric, value] = metrics as [Metric, string];
+      acc[metric] = acc[metric] || [];
+      acc[metric].push(parseInt(value));
+    });
+
+    return acc;
+  }, {} as MetricRows);
+}
+
+function DurationsChat({ title, urlRows }: Props) {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: {
       title: {
@@ -34,6 +29,16 @@ function DurationsChat({ title }: Props) {
         text: title,
       },
     },
+  };
+
+  const metricRows = getMetricRows(urlRows);
+
+  const data: ChartData<"line"> = {
+    labels: urlRows.map((_, index) => index),
+    datasets: Object.entries(metricRows).map(([label, data]) => ({
+      label,
+      data,
+    })),
   };
 
   return <Line options={options} data={data} />;
