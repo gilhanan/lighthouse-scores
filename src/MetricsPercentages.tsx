@@ -27,9 +27,10 @@ function MetricsPercentages({ percentages, onPercentagesChange }: Props) {
                     type="number"
                     className="w-full"
                     value={p10}
+                    step={10}
                     min={1}
                     max={median}
-                    onInput={({ currentTarget: { value } }) => {
+                    onChange={({ currentTarget: { value } }) => {
                       onPercentagesChange({
                         ...percentages,
                         [metric]: {
@@ -45,8 +46,9 @@ function MetricsPercentages({ percentages, onPercentagesChange }: Props) {
                     type="number"
                     className="w-full"
                     value={median}
+                    step={10}
                     min={p10}
-                    onInput={({ currentTarget: { value } }) => {
+                    onChange={({ currentTarget: { value } }) => {
                       onPercentagesChange({
                         ...percentages,
                         [metric]: {

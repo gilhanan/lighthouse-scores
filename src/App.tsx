@@ -41,17 +41,17 @@ ChartJS.register(
 );
 
 function App() {
-  const [url, setUrl] = useState<Url>("PDP");
+  const [url, setUrl] = useState<Url>("Gallery");
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
   const [settings, setSettings] = useState<SettingsMap>({
     minScore: 0,
-    appendRegressions: 0,
+    appendRegressions: 20,
     regressions: {
       responseStart: 100,
-      responseEnd: 150,
+      responseEnd: 200,
       slowestAssetDuration: 200,
-      duration: 300,
+      duration: 400,
     },
   });
   const [data, setData] = useState<UrlRows>();
@@ -83,7 +83,7 @@ function App() {
               computeLogNormalScore(
                 {
                   p10,
-                  median,
+                  median: Math.max(median, p10 + 1),
                 },
                 value
               ) * 100;
@@ -135,8 +135,8 @@ function App() {
             { title: "Metrics Durations", rows: getData() },
             { title: "Metrics Scores", rows: getScores() },
             { title: "Final Score", rows: getFinalScores() },
-          ].map((chart) => (
-            <div className="h-[300px]">
+          ].map((chart, index) => (
+            <div key={index} className="h-[300px]">
               <LineChart title={chart.title} rows={chart.rows} />
             </div>
           ))}

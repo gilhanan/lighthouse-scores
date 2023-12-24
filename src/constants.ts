@@ -10,56 +10,56 @@ export const scoresWeights: ScoresWeights = {
 export const scoresParameters: ScoresPercentages = {
   PDP: {
     responseStart: {
-      p10: 270,
-      median: 540,
+      p10: 290,
+      median: 350,
     },
     responseEnd: {
-      p10: 2800,
-      median: 5600,
+      p10: 2840,
+      median: 2970,
     },
     slowestAssetDuration: {
-      p10: 4600,
-      median: 5580,
+      p10: 4570,
+      median: 4720,
     },
     duration: {
-      p10: 5300,
-      median: 6715,
+      p10: 5550,
+      median: 5700,
     },
   },
   Gallery: {
     responseStart: {
-      p10: 580,
-      median: 1160,
+      p10: 590,
+      median: 660,
     },
     responseEnd: {
-      p10: 3980,
-      median: 4380,
+      p10: 3590,
+      median: 3690,
     },
     slowestAssetDuration: {
-      p10: 6490,
-      median: 7140,
+      p10: 5850,
+      median: 5930,
     },
     duration: {
-      p10: 7660,
-      median: 8420,
+      p10: 6830,
+      median: 7050,
     },
   },
   "Embed PDP": {
     responseStart: {
-      p10: 100,
-      median: 200,
+      p10: 110,
+      median: 160,
     },
     responseEnd: {
-      p10: 825,
-      median: 910,
+      p10: 750,
+      median: 870,
     },
     slowestAssetDuration: {
-      p10: 2640,
-      median: 2905,
+      p10: 2400,
+      median: 2560,
     },
     duration: {
-      p10: 3410,
-      median: 3750,
+      p10: 2920,
+      median: 3160,
     },
   },
 };
