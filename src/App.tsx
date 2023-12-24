@@ -12,7 +12,7 @@ import {
   Legend,
 } from "chart.js";
 import LineChart from "./LineChart";
-import { getData } from "./data";
+import { parseData } from "./data";
 import {
   Metric,
   ScoresPercentages,
@@ -27,6 +27,7 @@ import { computeLogNormalScore } from "./lighthouse/audit";
 import PercentagesParameters from "./MetricsPercentages";
 import SelectPage from "./SelectPage";
 import Settings from "./Settings";
+import { addRegressions } from "./utils";
 
 ChartJS.register(
   Colors,
@@ -43,15 +44,37 @@ function App() {
   const [url, setUrl] = useState<Url>("PDP");
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
-  const [settings, setSettings] = useState<SettingsMap>({ minScore: 0 });
+  const [settings, setSettings] = useState<SettingsMap>({
+    minScore: 0,
+    appendRegressions: 0,
+    regressions: {
+      responseStart: 100,
+      responseEnd: 150,
+      slowestAssetDuration: 200,
+      duration: 300,
+    },
+  });
   const [data, setData] = useState<UrlRows>();
 
+  const { appendRegressions, regressions, minScore } = settings;
+
   async function loadData() {
-    setData(await getData());
+    setData(await parseData());
+  }
+
+  function getData(): UrlRow[] {
+    const rows = data?.[url] || [];
+    return appendRegressions
+      ? addRegressions({
+          rows,
+          regressions,
+          appendRegressions,
+        })
+      : rows;
   }
 
   function getScores(): UrlRow[] {
-    return (data?.[url] || []).map(
+    return getData().map(
       (row) =>
         Object.fromEntries(
           (Object.entries(row) as [Metric, number][]).map(([metric, value]) => {
@@ -64,7 +87,7 @@ function App() {
                 },
                 value
               ) * 100;
-            return [metric, Math.max(score, settings.minScore)];
+            return [metric, Math.max(score, minScore)];
           })
         ) as UrlRow
     );
@@ -109,7 +132,7 @@ function App() {
       {data && (
         <div className="flex-1 flex flex-col gap-8">
           {[
-            { title: "Metrics Durations", rows: data[url] },
+            { title: "Metrics Durations", rows: getData() },
             { title: "Metrics Scores", rows: getScores() },
             { title: "Final Score", rows: getFinalScores() },
           ].map((chart) => (

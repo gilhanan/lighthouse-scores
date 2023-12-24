@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import { UrlRows, RawRow } from "./models";
 
-export async function getData(): Promise<UrlRows> {
+export async function parseData(): Promise<UrlRows> {
   const csvData: string = await (await fetch("./data.csv")).text();
 
   const { data } = Papa.parse<RawRow>(csvData, {

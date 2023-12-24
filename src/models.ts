@@ -28,6 +28,10 @@ export type UrlFinalScoreRow = { finalScore: number };
 
 export type UrlFinalScoreRows = Record<Url, UrlFinalScoreRow[]>;
 
+export type Regressions = Record<Metric, number>;
+
 export interface SettingsMap {
   minScore: number;
+  appendRegressions: number;
+  regressions: Regressions;
 }
