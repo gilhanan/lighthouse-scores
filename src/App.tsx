@@ -29,6 +29,7 @@ ChartJS.register(
 function App() {
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
+  const [minScore, setMinScore] = useState<number>(0);
   const [data, setData] = useState<UrlRows>({});
 
   async function loadData() {
@@ -65,7 +66,7 @@ function App() {
                       },
                       value
                     ) * 100;
-                  return [metric, Math.max(score, 80)];
+                  return [metric, Math.max(score, minScore)];
                 })
               ) as UrlRow
           );
@@ -152,6 +153,18 @@ function App() {
       <div className="flex flex-col gap-8">
         <DurationsCharts />
         <ScoresCharts />
+      </div>
+      <div>
+        <label className="flex gap-2">
+          <span>Min score</span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={minScore}
+            onInput={(e) => setMinScore(Number(e.currentTarget.value))}
+          />
+        </label>
       </div>
     </div>
   );
