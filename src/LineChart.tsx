@@ -1,15 +1,20 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
-import { UrlRow, Metric, MetricRows } from "./models";
 import { ChartOptions, ChartData } from "chart.js";
+
+type Row = Record<string, number>;
+
+type Metric = keyof Row;
+
+type MetricRows = Record<Metric, number[]>;
 
 interface Props {
   title: string;
-  urlRows: UrlRow[];
+  rows: Row[];
 }
 
-function getMetricRows(urlRows: UrlRow[]): MetricRows {
-  return urlRows.reduce<MetricRows>((acc, row) => {
+function getMetricRows(rows: Row[]): MetricRows {
+  return rows.reduce<MetricRows>((acc, row) => {
     Object.entries(row).forEach((metrics) => {
       const [metric, value] = metrics as [Metric, number];
       acc[metric] = acc[metric] || [];
@@ -20,7 +25,7 @@ function getMetricRows(urlRows: UrlRow[]): MetricRows {
   }, {} as MetricRows);
 }
 
-function DurationsChat({ title, urlRows }: Props) {
+function LineChart({ title, rows }: Props) {
   const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: {
@@ -31,10 +36,10 @@ function DurationsChat({ title, urlRows }: Props) {
     },
   };
 
-  const metricRows = getMetricRows(urlRows);
+  const metricRows = getMetricRows(rows);
 
   const data: ChartData<"line"> = {
-    labels: urlRows.map((_, index) => index),
+    labels: rows.map((_, index) => index),
     datasets: Object.entries(metricRows).map(([label, data]) => ({
       label,
       data,
@@ -44,4 +49,4 @@ function DurationsChat({ title, urlRows }: Props) {
   return <Line options={options} data={data} />;
 }
 
-export default DurationsChat;
+export default LineChart;

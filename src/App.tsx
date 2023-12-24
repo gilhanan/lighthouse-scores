@@ -9,21 +9,24 @@ import {
   LineElement,
   Title,
   Tooltip,
+  Legend,
 } from "chart.js";
-import DurationsChat from "./DurationsChat";
+import LineChart from "./LineChart";
 import { getData } from "./data";
 import {
   Metric,
   ScoresPercentages,
+  SettingsMap,
   Url,
   UrlFinalScoreRow,
-  UrlFinalScoreRows,
   UrlRow,
   UrlRows,
 } from "./models";
 import { scoresParameters, scoresWeights } from "./constants";
 import { computeLogNormalScore } from "./lighthouse/audit";
-import PercentagesParameters from "./PercentagesParameters";
+import PercentagesParameters from "./MetricsPercentages";
+import SelectPage from "./SelectPage";
+import Settings from "./Settings";
 
 ChartJS.register(
   Colors,
@@ -32,75 +35,52 @@ ChartJS.register(
   PointElement,
   LineElement,
   Title,
-  Tooltip
+  Tooltip,
+  Legend
 );
 
 function App() {
+  const [url, setUrl] = useState<Url>("PDP");
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
-  const [minScore, setMinScore] = useState<number>(0);
-  const [data, setData] = useState<UrlRows>({} as UrlRows);
+  const [settings, setSettings] = useState<SettingsMap>({ minScore: 0 });
+  const [data, setData] = useState<UrlRows>();
 
   async function loadData() {
     setData(await getData());
   }
 
-  function getScores(): UrlRows {
-    return Object.fromEntries(
-      (Object.entries(data) as [Url, UrlRow[]][]).map(([url, rows]) => {
-        const scores = rows.map((row) =>
-          Object.fromEntries(
-            (Object.entries(row) as [Metric, number][]).map(
-              ([metric, value]) => {
-                const { p10, median } = parameters[url][metric];
-                const score =
-                  computeLogNormalScore(
-                    {
-                      p10,
-                      median,
-                    },
-                    value
-                  ) * 100;
-                return [metric, Math.max(score, minScore)];
-              }
-            )
-          )
-        );
-
-        return [url, scores];
-      })
-    ) as UrlRows;
+  function getScores(): UrlRow[] {
+    return (data?.[url] || []).map(
+      (row) =>
+        Object.fromEntries(
+          (Object.entries(row) as [Metric, number][]).map(([metric, value]) => {
+            const { p10, median } = parameters[url][metric];
+            const score =
+              computeLogNormalScore(
+                {
+                  p10,
+                  median,
+                },
+                value
+              ) * 100;
+            return [metric, Math.max(score, settings.minScore)];
+          })
+        ) as UrlRow
+    );
   }
 
-  function getFinalScores(): UrlFinalScoreRows {
-    return Object.fromEntries(
-      Object.entries(getScores()).map(([url, rows]) => {
-        const scores = rows.map((row) =>
-          (Object.entries(row) as [Metric, number][]).reduce(
-            (acc, [metric, value]) => ({
-              ...acc,
-              finalScore: acc.finalScore + value * scoresWeights[metric],
-            }),
-            {
-              finalScore: 0,
-            } as UrlFinalScoreRow
-          )
-        );
-
-        return [url, scores];
-      })
-    ) as UrlFinalScoreRows;
-  }
-
-  function Charts({ data }: { data: UrlRows | UrlFinalScoreRows }) {
-    return (
-      <div className="flex flex-row">
-        {Object.entries(data).map(([url, rows]) => (
-          <div key={url} className="flex-1">
-            <DurationsChat title={url} urlRows={rows} />
-          </div>
-        ))}
-      </div>
+  function getFinalScores(): UrlFinalScoreRow[] {
+    return getScores().map((row) =>
+      (Object.entries(row) as [Metric, number][]).reduce(
+        (acc, [metric, value]) => ({
+          ...acc,
+          finalScore: acc.finalScore + value * scoresWeights[metric],
+        }),
+        {
+          finalScore: 0,
+        } as UrlFinalScoreRow
+      )
     );
   }
 
@@ -109,28 +89,36 @@ function App() {
   }, []);
 
   return (
-    <div className="p-4">
-      <PercentagesParameters
-        parameters={parameters}
-        onParametersChange={setParameters}
-      />
+    <div className="flex p-4 gap-8">
       <div className="flex flex-col gap-8">
-        <Charts data={data} />
-        <Charts data={getScores()} />
-        <Charts data={getFinalScores()} />
-      </div>
-      <div>
-        <label className="flex gap-2">
-          <span>Min score</span>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            value={minScore}
-            onInput={(e) => setMinScore(Number(e.currentTarget.value))}
+        <SelectPage
+          pages={Object.keys(data || {})}
+          page={url}
+          onPageChange={(page) => setUrl(page as Url)}
+        />
+        <div className="flex flex-col gap-4">
+          <PercentagesParameters
+            percentages={parameters[url]}
+            onPercentagesChange={(percentages) =>
+              setParameters({ ...parameters, [url]: percentages })
+            }
           />
-        </label>
+          <Settings settings={settings} onSettingsChange={setSettings} />
+        </div>
       </div>
+      {data && (
+        <div className="flex-1 flex flex-col gap-8">
+          {[
+            { title: "Metrics Durations", rows: data[url] },
+            { title: "Metrics Scores", rows: getScores() },
+            { title: "Final Score", rows: getFinalScores() },
+          ].map((chart) => (
+            <div className="h-[300px]">
+              <LineChart title={chart.title} rows={chart.rows} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

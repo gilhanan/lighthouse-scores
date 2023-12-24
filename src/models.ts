@@ -20,12 +20,14 @@ export type ScoresWeights = Record<Metric, number>;
 
 export type Percentages = Record<"p10" | "median", number>;
 
-export type MetricsPercentages = Record<Metric, Percentages>;
+export type MetricsPercentagesMap = Record<Metric, Percentages>;
 
-export type ScoresPercentages = Record<Url, MetricsPercentages>;
+export type ScoresPercentages = Record<Url, MetricsPercentagesMap>;
 
-export interface UrlFinalScoreRow {
-  finalScore: number;
-}
+export type UrlFinalScoreRow = { finalScore: number };
 
 export type UrlFinalScoreRows = Record<Url, UrlFinalScoreRow[]>;
+
+export interface SettingsMap {
+  minScore: number;
+}
