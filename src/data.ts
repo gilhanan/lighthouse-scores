@@ -14,7 +14,7 @@ export async function getData(): Promise<UrlRows> {
       ...acc,
       [url]: [...(acc[url] || []), row],
     }),
-    {}
+    {} as UrlRows
   );
 
   return urlRows;

@@ -12,9 +12,18 @@ import {
 } from "chart.js";
 import DurationsChat from "./DurationsChat";
 import { getData } from "./data";
-import { Metric, ScoresPercentages, Url, UrlRow, UrlRows } from "./models";
-import { scoresParameters } from "./constants";
+import {
+  Metric,
+  ScoresPercentages,
+  Url,
+  UrlFinalScoreRow,
+  UrlFinalScoreRows,
+  UrlRow,
+  UrlRows,
+} from "./models";
+import { scoresParameters, scoresWeights } from "./constants";
 import { computeLogNormalScore } from "./lighthouse/audit";
+import PercentagesParameters from "./PercentagesParameters";
 
 ChartJS.register(
   Colors,
@@ -30,113 +39,65 @@ function App() {
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
   const [minScore, setMinScore] = useState<number>(0);
-  const [data, setData] = useState<UrlRows>({});
+  const [data, setData] = useState<UrlRows>({} as UrlRows);
 
   async function loadData() {
     setData(await getData());
   }
 
-  function DurationsCharts() {
+  function getScores(): UrlRows {
+    return Object.fromEntries(
+      (Object.entries(data) as [Url, UrlRow[]][]).map(([url, rows]) => {
+        const scores = rows.map((row) =>
+          Object.fromEntries(
+            (Object.entries(row) as [Metric, number][]).map(
+              ([metric, value]) => {
+                const { p10, median } = parameters[url][metric];
+                const score =
+                  computeLogNormalScore(
+                    {
+                      p10,
+                      median,
+                    },
+                    value
+                  ) * 100;
+                return [metric, Math.max(score, minScore)];
+              }
+            )
+          )
+        );
+
+        return [url, scores];
+      })
+    ) as UrlRows;
+  }
+
+  function getFinalScores(): UrlFinalScoreRows {
+    return Object.fromEntries(
+      Object.entries(getScores()).map(([url, rows]) => {
+        const scores = rows.map((row) =>
+          (Object.entries(row) as [Metric, number][]).reduce(
+            (acc, [metric, value]) => ({
+              ...acc,
+              finalScore: acc.finalScore + value * scoresWeights[metric],
+            }),
+            {
+              finalScore: 0,
+            } as UrlFinalScoreRow
+          )
+        );
+
+        return [url, scores];
+      })
+    ) as UrlFinalScoreRows;
+  }
+
+  function Charts({ data }: { data: UrlRows | UrlFinalScoreRows }) {
     return (
       <div className="flex flex-row">
         {Object.entries(data).map(([url, rows]) => (
           <div key={url} className="flex-1">
             <DurationsChat title={url} urlRows={rows} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  function ScoresCharts() {
-    return (
-      <div className="flex flex-row">
-        {Object.entries(data).map(([url, rows]) => {
-          const scores = rows.map(
-            (row) =>
-              Object.fromEntries(
-                Object.entries(row).map(([metric, value]) => {
-                  const { p10, median } =
-                    parameters[url as Url][metric as Metric];
-                  const score =
-                    computeLogNormalScore(
-                      {
-                        p10,
-                        median,
-                      },
-                      value
-                    ) * 100;
-                  return [metric, Math.max(score, minScore)];
-                })
-              ) as UrlRow
-          );
-
-          return (
-            <div key={url} className="flex-1">
-              <DurationsChat title={url} urlRows={scores} />
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  function Parameters() {
-    return (
-      <div className="flex">
-        {Object.entries(parameters).map(([url, rows]) => (
-          <div key={url} className="flex flex-col border">
-            <div className="p-2 font-bold">{url}</div>
-            <div className="flex">
-              <div className="p-2">
-                {Object.keys(rows).map((metric) => (
-                  <div key={metric}>{metric}</div>
-                ))}
-              </div>
-              <div className="p-2">
-                {Object.entries(rows).map(([metric, { p10, median }]) => (
-                  <div key={metric}>
-                    <input
-                      type="number"
-                      className="w-16"
-                      value={p10}
-                      min={1}
-                      max={median}
-                      onInput={(e) => {
-                        setParameters({
-                          ...parameters,
-                          [url]: {
-                            ...parameters[url as Url],
-                            [metric as Metric]: {
-                              ...[parameters[url as Url][metric as Metric]],
-                              p10: Number(e.currentTarget.value),
-                            },
-                          },
-                        });
-                      }}
-                    />
-                    <input
-                      type="number"
-                      className="w-16"
-                      value={median}
-                      min={p10}
-                      onInput={(e) => {
-                        setParameters({
-                          ...parameters,
-                          [url]: {
-                            ...parameters[url as Url],
-                            [metric as Metric]: {
-                              ...[parameters[url as Url][metric as Metric]],
-                              metric: Number(e.currentTarget.value),
-                            },
-                          },
-                        });
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         ))}
       </div>
@@ -149,10 +110,14 @@ function App() {
 
   return (
     <div className="p-4">
-      <Parameters />
+      <PercentagesParameters
+        parameters={parameters}
+        onParametersChange={setParameters}
+      />
       <div className="flex flex-col gap-8">
-        <DurationsCharts />
-        <ScoresCharts />
+        <Charts data={data} />
+        <Charts data={getScores()} />
+        <Charts data={getFinalScores()} />
       </div>
       <div>
         <label className="flex gap-2">

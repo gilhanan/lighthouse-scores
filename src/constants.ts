@@ -1,4 +1,11 @@
-import { ScoresPercentages } from "./models";
+import { ScoresPercentages, ScoresWeights } from "./models";
+
+export const scoresWeights: ScoresWeights = {
+  responseStart: 0.25,
+  responseEnd: 0.25,
+  slowestAssetDuration: 0.25,
+  duration: 0.25,
+};
 
 export const scoresParameters: ScoresPercentages = {
   PDP: {
