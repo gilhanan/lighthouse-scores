@@ -26,12 +26,14 @@ ClientTelemetry
 | extend responseEnd = tolong(data_details["responseEnd"])
 | extend slowestAssetDuration = tolong(data_details["slowestAssetDuration"])
 | extend duration = tolong(data_details["duration"])
-| order by url, ext_ingest_time asc
-| extend rowGroup = ceiling(row_number() / 11)
 | summarize 
+    count(),
+    arg_min(ext_ingest_time, ext_ingest_time),
     responseStart=percentile(responseStart, 50),
     responseEnd=percentile(responseEnd, 50),
     slowestAssetDuration=percentile(slowestAssetDuration, 50),
     duration=percentile(duration, 50)
-    by url, rowGroup
-| project-away rowGroup
+    by url, data_appVersion
+| where count_ == 11
+| order by url, ext_ingest_time asc
+| project url, responseStart, responseEnd, slowestAssetDuration, duration
