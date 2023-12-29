@@ -41,17 +41,17 @@ ChartJS.register(
 );
 
 function App() {
-  const [url, setUrl] = useState<Url>("Gallery");
+  const [url, setUrl] = useState<Url>("PDP");
   const [parameters, setParameters] =
     useState<ScoresPercentages>(scoresParameters);
   const [settings, setSettings] = useState<SettingsMap>({
     minScore: 0,
-    appendRegressions: 20,
+    appendRegressions: 5,
     regressions: {
       responseStart: 100,
       responseEnd: 200,
       slowestAssetDuration: 200,
-      duration: 400,
+      duration: 200,
     },
   });
   const [data, setData] = useState<UrlRows>();

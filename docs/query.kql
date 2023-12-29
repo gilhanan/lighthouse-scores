@@ -1,9 +1,9 @@
-let _startTime = datetime(2023-09-20);
-let _endTime = datetime(2023-12-17);
+let _startTime = ago(10d);
+let _endTime = now();
 ClientTelemetry
 | where ext_ingest_time between (_startTime .. _endTime)
 | where data_action == "Root Handler"
-| where data_userAgent == "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36"
+| where data_userAgent == "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
 | where data_host in ("smp-euap-pb-eus2-staging.azurewebsites.net", "appgallery.spza-canary.net")
 | extend url = replace_regex(data_page, @"https:\/\/[^\/]+", "")
 | where url in ( 
@@ -29,11 +29,11 @@ ClientTelemetry
 | summarize 
     count(),
     arg_min(ext_ingest_time, ext_ingest_time),
-    responseStart=percentile(responseStart, 50),
-    responseEnd=percentile(responseEnd, 50),
-    slowestAssetDuration=percentile(slowestAssetDuration, 50),
-    duration=percentile(duration, 50)
-    by url, data_appVersion
-| where count_ == 11
-| order by url, ext_ingest_time asc
+    responseStart=percentile(responseStart, 10),
+    responseEnd=percentile(responseEnd, 10),
+    slowestAssetDuration=percentile(slowestAssetDuration, 10),
+    duration=percentile(duration, 10)
+    by data_appVersion, url
+| where count_ == 31
+| order by url, ext_ingest_time
 | project url, responseStart, responseEnd, slowestAssetDuration, duration
