@@ -11,7 +11,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import LineChart from "./LineChart";
+import annotationPlugin from "chartjs-plugin-annotation";
+import LineChart, { LineChartProps } from "./LineChart";
 import { parseData } from "./data";
 import {
   Metric,
@@ -37,7 +38,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 function App() {
@@ -110,6 +112,34 @@ function App() {
     loadData();
   }, []);
 
+  const regressionsAnnotation = {
+    xMin: data?.[url].length,
+    xMax: data?.[url].length,
+  };
+  const scoreAnnotations = [
+    { yMin: 95, yMax: 95 },
+    { yMin: 5, yMax: 5 },
+    regressionsAnnotation,
+  ];
+
+  const chartsProps = [
+    {
+      title: "Metrics Durations",
+      rows: getData(),
+      annotations: [regressionsAnnotation],
+    },
+    {
+      title: "Metrics Scores",
+      rows: getScores(),
+      annotations: scoreAnnotations,
+    },
+    {
+      title: "Final Score",
+      rows: getFinalScores(),
+      annotations: scoreAnnotations,
+    },
+  ] satisfies LineChartProps[];
+
   return (
     <div className="flex p-4 gap-8">
       <div className="flex flex-col gap-8">
@@ -130,13 +160,9 @@ function App() {
       </div>
       {data && (
         <div className="flex-1 flex flex-col gap-8">
-          {[
-            { title: "Metrics Durations", rows: getData() },
-            { title: "Metrics Scores", rows: getScores() },
-            { title: "Final Score", rows: getFinalScores() },
-          ].map((chart, index) => (
+          {chartsProps.map((props, index) => (
             <div key={index} className="h-[300px]">
-              <LineChart title={chart.title} rows={chart.rows} />
+              <LineChart {...props} />
             </div>
           ))}
         </div>

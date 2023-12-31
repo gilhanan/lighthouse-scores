@@ -1,6 +1,7 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData } from "chart.js";
+import { AnnotationOptions } from "chartjs-plugin-annotation";
 
 type Row = Record<string, number>;
 
@@ -8,9 +9,15 @@ type Metric = keyof Row;
 
 type MetricRows = Record<Metric, number[]>;
 
-interface Props {
+export interface LineChartProps {
   title: string;
   rows: Row[];
+  annotations?: {
+    yMin?: number;
+    yMax?: number;
+    xMin?: number;
+    xMax?: number;
+  }[];
 }
 
 function getMetricRows(rows: Row[]): MetricRows {
@@ -25,13 +32,25 @@ function getMetricRows(rows: Row[]): MetricRows {
   }, {} as MetricRows);
 }
 
-function LineChart({ title, rows }: Props) {
+function LineChart({ title, rows, annotations }: LineChartProps) {
   const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: {
       title: {
         display: true,
         text: title,
+      },
+      annotation: {
+        annotations: annotations?.map<AnnotationOptions>(
+          ({ yMin, yMax, xMin, xMax }) => ({
+            type: "line",
+            yMin,
+            yMax,
+            xMin,
+            xMax,
+            borderWidth: 2,
+          })
+        ),
       },
     },
   };
