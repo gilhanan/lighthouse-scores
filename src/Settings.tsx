@@ -29,13 +29,12 @@ function Settings({ settings, onSettingsChange }: Props) {
         <label className="flex gap-2 items-center">
           <span>Append regressions</span>
           <input
-            type="number"
-            min={0}
-            value={settings.appendRegressions}
-            onInput={(e) =>
+            type="checkbox"
+            checked={settings.appendRegressions}
+            onChange={({ currentTarget: { checked } }) =>
               onSettingsChange({
                 ...settings,
-                appendRegressions: Number(e.currentTarget.value),
+                appendRegressions: checked,
               })
             }
           />

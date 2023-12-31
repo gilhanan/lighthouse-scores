@@ -32,6 +32,6 @@ export type Regressions = Record<Metric, number>;
 
 export interface SettingsMap {
   minScore: number;
-  appendRegressions: number;
+  appendRegressions: boolean;
   regressions: Regressions;
 }

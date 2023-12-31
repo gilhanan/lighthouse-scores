@@ -46,7 +46,7 @@ function App() {
     useState<ScoresPercentages>(scoresParameters);
   const [settings, setSettings] = useState<SettingsMap>({
     minScore: 0,
-    appendRegressions: 5,
+    appendRegressions: true,
     regressions: {
       responseStart: 100,
       responseEnd: 200,
@@ -68,7 +68,6 @@ function App() {
       ? addRegressions({
           rows,
           regressions,
-          appendRegressions,
         })
       : rows;
   }
