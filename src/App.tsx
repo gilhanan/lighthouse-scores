@@ -53,7 +53,7 @@ function App() {
       responseStart: 100,
       responseEnd: 200,
       slowestAssetDuration: 200,
-      duration: 200,
+      duration: 300,
     },
   });
   const [data, setData] = useState<UrlRows>();
