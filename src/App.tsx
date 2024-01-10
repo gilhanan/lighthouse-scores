@@ -51,9 +51,9 @@ function App() {
     appendRegressions: true,
     regressions: {
       responseStart: 100,
-      responseEnd: 200,
-      slowestAssetDuration: 200,
-      duration: 300,
+      responseEnd: 100,
+      slowestAssetDuration: 100,
+      duration: 100,
     },
   });
   const [data, setData] = useState<UrlRows>();

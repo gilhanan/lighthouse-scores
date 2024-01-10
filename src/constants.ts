@@ -10,20 +10,20 @@ export const scoresWeights: ScoresWeights = {
 export const scoresParameters: ScoresPercentages = {
   PDP: {
     responseStart: {
-      p10: 290,
-      median: 320,
+      p10: 300,
+      median: 380,
     },
     responseEnd: {
-      p10: 2820,
-      median: 2880,
+      p10: 2850,
+      median: 2910,
     },
     slowestAssetDuration: {
-      p10: 4610,
-      median: 4670,
+      p10: 4570,
+      median: 4650,
     },
     duration: {
-      p10: 5420,
-      median: 5450,
+      p10: 5010,
+      median: 5080,
     },
   },
   Gallery: {
